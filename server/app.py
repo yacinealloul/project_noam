@@ -8,9 +8,8 @@ import time
 
 
 app = Flask(__name__)
-
-CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["http://localhost:3000"]}})
-
+app.config['CORS_HEADERS'] = 'Content-Type'
+CORS(app, supports_credentials=True, resources={r"/stream-data": {"origins": ["http://localhost:3000"]}})
 TOTAL_REQUESTS = 5000            
 CONCURRENT_REQUESTS = 100        
 STREAM_INTERVAL = 5             
@@ -73,7 +72,7 @@ async def fetch_all_dummy_data() -> list:
 
 
 @app.route('/stream-data', methods=['GET', 'OPTIONS'])
-@cross_origin(origins=["http://localhost:3000","*"], supports_credentials=True)
+@cross_origin(origins=["http://localhost:3000"], supports_credentials=True)
 def stream_data():
     """
     Stream dummy Pokémon data as Server-Sent Events (SSE).
@@ -109,7 +108,7 @@ def stream_data():
         finally:
             loop.close()
 
-    response = Response(stream_with_context(event_stream()), mimetype="text/event-stream")
+    response = Response(stream_with_context(event_stream()), mimetype="text/event-stream",content_type='text/event-stream')
     response.headers['Cache-Control'] = 'no-cache'
     response.headers['Connection'] = 'keep-alive'
     return response
